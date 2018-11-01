@@ -6,7 +6,8 @@
   "scripts": {
     "start": "webpack && webpack-dev-server --open",
     "test": "karma start",
-    "build": "webpack && npm run ares-cdn"
+    "build": "webpack && npm run ares-cdn",
+    "product":"nodemon examples/spa/startup"
   },
   "repository": {
     "type": "git",

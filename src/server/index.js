@@ -2,7 +2,7 @@ import * as _ from "../share/util"
 import pathToRegexp from 'path-to-regexp'
 
 export default function createApp(appSettings) {
-    let routes = appSettings
+    let routes = appSettings.routes
     let matcher = makeMatcher(routes)
     return {
         render: render
@@ -20,11 +20,15 @@ function makeMatcher(routes) {
         let cleanUrl = cleanPath(url)
         for (let i = 0; i < routes.length; i++) {
             let route = routes[i]
-            // let matches = 
-            // if (route.path !== cleanUrl) {
-            //     continue
-            // }
-            return route.controller
+            let matches = route.regexp.exec(cleanUrl)
+            if (!matches) { continue }
+            let params = getParams(matches, route.keys)
+
+            return {
+                path: route.path,
+                controller: route.controller,
+                params
+            }
         }
     }
 }
@@ -38,4 +42,19 @@ function createRoute(route) {
 
 function cleanPath(path) {
     return path.replace(/\/\//g, '/')
+}
+
+function getParams(matches, keys) {
+    let params = {}
+    for (let i = 1, len = matches.length; i < len; i++) {
+        let key = keys[i - 1]
+        if (key) {
+            if (typeof matches[i] === 'string') {
+                params[key.name] = decodeURIComponent(matches[i])
+            } else {
+                params[key.name] = matches[i]
+            }
+        }
+    }
+    return params
 }
