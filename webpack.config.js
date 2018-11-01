@@ -6,11 +6,11 @@ const CleanWebpackPlugin = require('clean-webpack-plugin')
 module.exports = {
     mode: "development",
     entry: {
-        index: ["./src/index.js"],
+        index: ["./examples/spa/src/index.js"],
     },
     output: {
-        path: path.resolve(__dirname, './dist'),
-        filename: 'tour-im-right.js',
+        path: path.resolve(__dirname, './examples/spa/dist'),
+        filename: 'index.js',
     },
     // devtool: 'inline-source-map',
     module: {
@@ -50,7 +50,7 @@ module.exports = {
                 removeAttributeQuetes: true,
             },
             // hash: true,
-            template: "./src/index.html"
+            template: "./examples/spa/src/index.html"
         })
     ],
     devServer: {
