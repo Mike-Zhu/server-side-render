@@ -10,6 +10,7 @@ export default function createApp(appSettings) {
 
     function render(url) {
         let route = matcher(url)
+        if (!route) { return route }
         let contentString = getContentString(route)
         return contentString
     }

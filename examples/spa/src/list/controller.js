@@ -23,6 +23,7 @@ export default class Controller {
 					<li><a href="/list" onClick={this.jump}>list page</a></li>
 					<li><a href="/detail" onClick={this.jump}>detail page</a></li>
 				</ul>
+				<p>list!!!</p>
 			</div>
 		)
 	}

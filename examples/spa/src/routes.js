@@ -13,7 +13,7 @@ export default [
         path: '/detail',
         controller: require('./detail/controller'),
     }, {
-        path: '*',
+        path: '/*',
         controller: require('./detail/controller'),
     }
 ]

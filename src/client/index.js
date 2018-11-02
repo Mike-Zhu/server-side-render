@@ -12,13 +12,21 @@ export default function Client(appSettings) {
     }
 
     function start() {
+        const unlisten = browserHistory.listen((location, action) => {
+            // location is an object like window.location
+            console.log("actions")
+            let component = getComponent(location)
+            viewEngine(component, root)
+            console.log(action, location, location.state);
+        });
+
         let { location } = browserHistory
-        let route = matcher(location.pathname)
-        let component = getContentString(route)
+        let component = getComponent(location)
         viewEngine(component, root)
     }
 
-    function getContentString(route) {
+    function getComponent(location) {
+        let route = matcher(location.pathname)
         let { controller } = route
         let Controller = controller.default
         let initObject = new Controller()
@@ -29,7 +37,6 @@ export default function Client(appSettings) {
 
     function goTo(url) {
         browserHistory.push(url)
-        start()
         console.log(url)
     }
 }
