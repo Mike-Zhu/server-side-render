@@ -17,7 +17,7 @@ export default class Controller {
 	render() {
 		return (
 			<div>
-				<h1>home: { JSON.stringify(this.location, null, 2) }</h1>
+				<h1>home: {JSON.stringify(this.location, null, 2)}</h1>
 				<ul>
 					<li><a href="/home" onClick={this.jump}>home page</a></li>
 					<li><a href="/list" onClick={this.jump}>list page</a></li>

@@ -50,7 +50,7 @@ module.exports = {
                 removeAttributeQuetes: true,
             },
             // hash: true,
-            template: "./examples/spa/src/index.html"
+            template: "./examples/spa/index.html"
         })
     ],
     devServer: {

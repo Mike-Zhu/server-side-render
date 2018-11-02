@@ -7,14 +7,21 @@ import createApp from '../../src/server'
 
 let indexFile = fs.readFileSync(path.join(__dirname, './index.html')).toString()
 let appSettings = {
-    routes: routes
+    routes: routes,
+    viewEngine
+}
+
+function viewEngine(component) {
+    return renderToString(component)
 }
 
 let app = createApp(appSettings)
 
 let server = http.createServer(async function (req, res) {
     res.on('error', console.error.bind(console))
-    if (req.url === "/favicon.ico") {
+    let url = req.url
+    console.log(url)
+    if (url === "/favicon.ico") {
         res.writeHeader(200, {
             'Content-Type': 'text/html'
         })
@@ -22,7 +29,15 @@ let server = http.createServer(async function (req, res) {
         res.end(html)
         return
     }
-    let url = req.url
+
+    if (/\.js/.test(url)) {
+        res.writeHead(200, {
+            'Content-Type': 'text/javascript'
+        })
+        let file = path.join(__dirname, url)
+        readFile(file).pipe(res)
+        return
+    }
 
     let content = app.render(url)
     res.writeHeader(200, {
@@ -43,4 +58,8 @@ function render(content) {
         `<div id="container"></div>`,
         `<div id="container">${content}</div>`
     )
+}
+
+function readFile(file) {
+    return fs.createReadStream(file)
 }
