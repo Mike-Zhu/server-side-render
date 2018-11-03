@@ -1,37 +1,65 @@
-import { createBrowserHistory } from "history"
+import { createBrowserHistory, createLocation } from "history"
 import makeMatcher from "../share/matcher"
 import defaultSettings from "../share/constant"
 import * as _ from "../share/util"
 
-let browserHistory = createBrowserHistory()
-window.browserHistory = browserHistory
+let history = createBrowserHistory()
+window.browserhistory = history
 export default function Client(appSettings) {
     let finalSettings = _.extend(defaultSettings, appSettings)
-    let { routes, container, viewEngine } = finalSettings
+    let {
+        routes,
+        container,
+        viewEngine,
+        context
+    } = finalSettings
     let root = document.querySelector(container)
     let matcher = makeMatcher(routes)
 
+    context = {
+        ...context,
+        ...appSettings.context
+    }
+
+    let currentLocation = null
+    let currentController = null
+    let unlisten = undefined
+    let conponentCache = {}
     return {
-        start
+        start,
+        stop
+    }
+
+    function stop() {
+        unlisten()
     }
 
     function start() {
-        const unlisten = browserHistory.listen((location, action) => {
-            // location is an object like window.location
-            console.log("actions")
-            let component = getComponent(location)
-            viewEngine(component, root)
-            console.log(action, location, location.state);
-        });
-
-        let { location } = browserHistory
-        let component = getComponent(location)
-        viewEngine(component, root)
+        let listener = function (location, action) {
+            let result = render(location)
+        }
+        unlisten = history.listen(listener);
     }
 
-    function getComponent(location) {
-        let route = matcher(location.pathname)
-        let { controller } = route
+    function render(tagetPath) {
+        let location = typeof tagetPath === "string" ? createLocation(tagetPath) : location
+        context.preLocation = currentLocation
+        currentLocation = location
+
+        let matches = matcher(location.pathname)
+        if (!matches) {
+            throw new Error('404')
+        }
+        let { path, controller, params } = matches
+
+        //强化location对象
+        location.pattern = path
+        location.params = params
+        location.raw = location.pathname + location.search
+
+        let initController = createInitController(location)
+
+        let { controller } = matches
         let Controller = controller.default
         let initObject = new Controller()
         initObject.goTo = goTo
@@ -39,9 +67,36 @@ export default function Client(appSettings) {
         return component
     }
 
+    function createInitController(location) {
+        //这里的hoc主要是为了缓存
+        return function (Controller) {
+            if (currentLocation !== location) { return }
+            detroyController()
+            let controller = currentController = getControllerFromCache(location)
+            let component
+            if (controller) {
+
+            } else {
+                controller = gerController(location.pattern, Controller)
+            }
+        }
+    }
+
+    function gerController(pattern, Controller) {
+        if (conponentCache.hasOwnProperty(pattern)) { return conponentCache[pattern] }
+        class Wrapper extends Controller{
+
+        }
+        conponentCache[pattern] = Wrapper
+        return Wrapper
+    }
     function goTo(url) {
-        browserHistory.push(url)
+        history.push(url)
         console.log(url)
+    }
+
+    function detroyController() {
+
     }
 }
 

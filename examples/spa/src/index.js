@@ -2,9 +2,14 @@ import routes from './routes'
 import ReactDom from 'react-dom'
 import Client from "../../../src/index"
 
+let viewEngine = {
+    render:(component,container) => {
+        return ReactDom.hydrate(component,container)
+    }
+}
 let appSettings = {
     routes: routes,
-    viewEngine: ReactDom.hydrate,
+    viewEngine: viewEngine,
     container:"#container"
 }
 
