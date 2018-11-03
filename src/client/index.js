@@ -1,10 +1,14 @@
 import { createBrowserHistory } from "history"
 import makeMatcher from "../share/matcher"
+import defaultSettings from "../share/constant"
+import * as _ from "../share/util"
 
 let browserHistory = createBrowserHistory()
 window.browserHistory = browserHistory
 export default function Client(appSettings) {
-    let { routes, root, viewEngine } = appSettings
+    let finalSettings = _.extend(defaultSettings, appSettings)
+    let { routes, container, viewEngine } = finalSettings
+    let root = document.querySelector(container)
     let matcher = makeMatcher(routes)
 
     return {

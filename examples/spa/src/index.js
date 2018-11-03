@@ -2,11 +2,10 @@ import routes from './routes'
 import ReactDom from 'react-dom'
 import Client from "../../../src/index"
 
-let root = document.getElementById("container")
 let appSettings = {
     routes: routes,
     viewEngine: ReactDom.hydrate,
-    root
+    container:"#container"
 }
 
 let app = new Client(appSettings)
