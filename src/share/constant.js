@@ -8,4 +8,5 @@ export default {
     },
     basename:"",
     containr:"#container",
+    loader: value => value,
 }

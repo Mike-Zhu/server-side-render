@@ -6,13 +6,13 @@ const CleanWebpackPlugin = require('clean-webpack-plugin')
 module.exports = {
     mode: "development",
     entry: {
-        index: ["./examples/spa/src/index.js"],
+        index: ["babel-polyfill","./examples/spa/src/index.js"],
     },
     output: {
         path: path.resolve(__dirname, './examples/spa/dist'),
         filename: 'index.js',
     },
-    // devtool: 'inline-source-map',
+    devtool: 'inline-source-map',
     module: {
         rules: [
             {

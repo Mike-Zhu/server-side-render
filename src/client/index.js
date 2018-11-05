@@ -3,14 +3,14 @@ import makeMatcher from "../share/matcher"
 import defaultSettings from "../share/constant"
 import * as _ from "../share/util"
 
-let history = createBrowserHistory()
-window.browserhistory = history
+
 export default function Client(appSettings) {
     let finalSettings = _.extend(defaultSettings, appSettings)
     let {
         routes,
         container,
         viewEngine,
+        loader,
         context
     } = finalSettings
     let root = document.querySelector(container)
@@ -25,6 +25,11 @@ export default function Client(appSettings) {
     let currentController = null
     let unlisten = undefined
     let conponentCache = {}
+    let finalContainer = null
+
+    let history = createBrowserHistory()
+    window.browserhistory = history
+
     return {
         start,
         stop
@@ -39,10 +44,11 @@ export default function Client(appSettings) {
             let result = render(location)
         }
         unlisten = history.listen(listener);
+        listener(history.location)
     }
 
     function render(tagetPath) {
-        let location = typeof tagetPath === "string" ? createLocation(tagetPath) : location
+        let location = typeof tagetPath === "string" ? createLocation(tagetPath) : tagetPath
         context.preLocation = currentLocation
         currentLocation = location
 
@@ -58,13 +64,12 @@ export default function Client(appSettings) {
         location.raw = location.pathname + location.search
 
         let initController = createInitController(location)
-
-        let { controller } = matches
-        let Controller = controller.default
-        let initObject = new Controller()
-        initObject.goTo = goTo
-        let component = initObject.init()
-        return component
+        let Controller = loader(controller, location, context)
+        if (_.isPromise(Controller)) {
+            Controller.then(initController)
+        } else {
+            initController(Controller)
+        }
     }
 
     function createInitController(location) {
@@ -77,26 +82,55 @@ export default function Client(appSettings) {
             if (controller) {
 
             } else {
-                controller = gerController(location.pattern, Controller)
+                let FinalController = getController(location.pattern, Controller)
+                controller = currentController = new FinalController(location, context)
+                component = controller.init()
             }
+            return renderToContainer(component)
         }
     }
 
-    function gerController(pattern, Controller) {
+    function getController(pattern, Controller) {
         if (conponentCache.hasOwnProperty(pattern)) { return conponentCache[pattern] }
-        class Wrapper extends Controller{
+        class Wrapper extends Controller {
+            constructor(location, context) {
+                super(location, context)
+                this.location = this.location || location
+                this.context = this.context || context
+                this.history = history
+            }
 
+            goTo(url) {
+                history.push(url)
+            }
         }
         conponentCache[pattern] = Wrapper
         return Wrapper
     }
-    function goTo(url) {
-        history.push(url)
-        console.log(url)
+
+    function getControllerFromCache(location) {
+
     }
 
     function detroyController() {
 
+    }
+
+    function renderToContainer(component) {
+        return viewEngine.render(component, getContainer())
+    }
+
+    function getContainer() {
+        if (finalContainer) return finalContainer
+        if (typeof container === "string") {
+            return finalContainer = document.querySelector(container)
+        } else {
+            return finalContainer = container
+        }
+    }
+
+    function clearContainer() {
+        finalContainer = null
     }
 }
 
