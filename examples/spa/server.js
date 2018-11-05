@@ -8,7 +8,8 @@ import createApp from '../../src/server'
 let indexFile = fs.readFileSync(path.join(__dirname, './index.html')).toString()
 let appSettings = {
     routes: routes,
-    viewEngine
+    viewEngine,
+    loader: value => value.default || value
 }
 
 function viewEngine(component) {
