@@ -17,10 +17,18 @@ export default function createApp(appSettings) {
         let location = createLocation(url)
         let matches = matcher(location.pathname)
         if (!matches) { return }
-        let { controller } = matches
+        let { controller: Controller, path, params } = matches
+
+        //强化location对象
+        location.pattern = path
+        location.params = params
+        location.raw = location.pathname + location.search
+
         let initComponent = createInitController(location)
-        let FinalController = initComponent(controller)
-        let component = (new FinalController(location, {})).init()
+        Controller = loader(Controller)
+        let FinalController = initComponent(Controller)
+        let controller = new FinalController(location, {})
+        let component = controller.init()
         return viewEngine(component)
     }
 
@@ -31,17 +39,13 @@ export default function createApp(appSettings) {
         }
     }
     function getController(pattern, Controller) {
+        console.log(Controller)
         if (conponentCache.hasOwnProperty(pattern)) { return conponentCache[pattern] }
         class Wrapper extends Controller {
             constructor(location, context) {
                 super(location, context)
                 this.location = this.location || location
                 this.context = this.context || context
-                this.history = history
-            }
-
-            goTo(url) {
-                history.push(url)
             }
         }
         conponentCache[pattern] = Wrapper
